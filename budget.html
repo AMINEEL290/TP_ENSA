@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Budget étudiant</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+</head>
+<body>
+<div id="app">
+  <h1>Budget étudiant</h1>
+  <p>Budget mensuel : <strong>{{ budgetMensuel }} DH</strong></p>
+
+ 
+  <form @submit.prevent="ajouterDepense">
+    <input type="text" v-model="nouvelleDepense.titre" placeholder="Titre" required>
+    <input type="number" min="0" step="0.01" v-model.number="nouvelleDepense.montant" placeholder="Montant" required>
+    <select v-model="nouvelleDepense.categorie">
+      <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
+    </select>
+    <button type="submit">Ajouter</button>
+  </form>
+
+  
+  <div>
+    <button :class="{ active: filtreCategorie === 'toutes' }" @click="selectionnerCategorie('toutes')">Toutes</button>
+    <button v-for="c in categories" :key="c"
+            :class="{ active: filtreCategorie === c }"
+            @click="selectionnerCategorie(c)">{{ c }}</button>
+  </div>
+
+  
+  <div>
+    <p>Total affiché : <strong>{{ totalFiltre.toFixed(2) }} DH</strong></p>
+    <p>Total général : <strong>{{ totalGeneral.toFixed(2) }} DH</strong></p>
+    <p>Moyenne par dépense : <strong>{{ moyenneDepense.toFixed(2) }} DH</strong></p>
+  </div>
+
+  
+  <div v-if="totalGeneral < 0.8 * budgetMensuel">Budget maîtrisé.</div>
+  <div v-else-if="totalGeneral <= budgetMensuel">Attention : vous approchez de votre budget.</div>
+  <div v-else>Budget dépassé !</div>
+
+ 
+  <button @click="afficherStats = !afficherStats">
+    {{ afficherStats ? 'Masquer' : 'Afficher' }} le détail par catégorie
+  </button>
+  <div v-show="afficherStats">
+    <p v-for="c in categories" :key="c">{{ c }} : {{ totalCategorie(c).toFixed(2) }} DH</p>
+  </div>
+
+
+  <ul v-if="depensesFiltrees.length > 0">
+    <li v-for="d in depensesFiltrees" :key="d.id">
+      <span>{{ d.titre }} ({{ d.categorie }})</span>
+      <span>{{ d.montant.toFixed(2) }} DH
+        <button @click="supprimerDepense(d)">Supprimer</button>
+      </span>
+    </li>
+  </ul>
+  <p v-else>Aucune dépense à afficher.</p>
+</div>
+
+<script src="budget.js"></script>
+</body>
+</html>
