@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tableau de bord des notes</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>Tableau de bord des notes</h1>
+    <p>Suivi des résultats du semestre</p>
+  </header>
+
+  <main>
+    <section aria-labelledby="bilan-title">
+      <h2 id="bilan-title">Bilan général</h2>
+      <p>Moyenne pondérée : <strong>{{ moyenneGenerale.toFixed(2) }}/20</strong></p>
+      <p>
+        Mention :
+        <strong v-if="moyenneGenerale >= 16">Très bien</strong>
+        <strong v-else-if="moyenneGenerale >= 14">Bien</strong>
+        <strong v-else-if="moyenneGenerale >= 12">Assez bien</strong>
+        <strong v-else-if="moyenneGenerale >= 10">Passable</strong>
+        <strong v-else>Insuffisant</strong>
+      </p>
+      <p v-if="modules.length > 0 && tousValides()">Tous les modules sont validés.</p>
+      <p>
+        Meilleur module :
+        <strong v-if="moduleMax">{{ moduleMax.nom }} ({{ moduleMax.note }}/20)</strong>
+        <span v-else>Aucun module</span>
+      </p>
+      <p>
+        Module le moins bien noté :
+        <strong v-if="moduleMin">{{ moduleMin.nom }} ({{ moduleMin.note }}/20)</strong>
+        <span v-else>Aucun module</span>
+      </p>
+    </section>
+
+    <section aria-labelledby="rattrapage-title">
+      <h2 id="rattrapage-title">Modules à rattraper ({{ modulesARattraper.length }})</h2>
+      <ul v-if="modulesARattraper.length > 0">
+        <li v-for="module in modulesARattraper" :key="module.id">
+          {{ module.nom }} — {{ module.note }}/20
+        </li>
+      </ul>
+      <p v-else>Aucun module à rattraper.</p>
+    </section>
+
+    <section aria-labelledby="modules-title">
+      <h2 id="modules-title">Modules</h2>
+      <label for="recherche">Rechercher un module</label>
+      <input id="recherche" type="search" v-model="recherche" placeholder="Nom du module">
+
+      <ul v-if="modulesAffiches.length > 0">
+        <li v-for="module in modulesAffiches" :key="module.id">
+          <div>
+            <strong>{{ module.nom }}</strong>
+            <span> — {{ module.note }}/20, coefficient {{ module.coefficient }}</span>
+            <span v-if="module.note < 10"> — À rattraper</span>
+            <span v-else> — Validé</span>
+            <button type="button" @click="toggleDetail(module)">Détail</button>
+            <button type="button" @click="supprimerModule(module)">Supprimer</button>
+          </div>
+          <div v-show="moduleOuvert === module.id">
+            <p>Note : {{ module.note }}/20</p>
+            <p>Coefficient : {{ module.coefficient }}</p>
+            <p>Points pondérés : {{ (module.note * module.coefficient).toFixed(2) }}</p>
+          </div>
+        </li>
+      </ul>
+      <p v-else>Aucun module trouvé.</p>
+    </section>
+
+    <section aria-labelledby="ajout-title">
+      <h2 id="ajout-title">Ajouter un module</h2>
+      <form @submit.prevent="ajouterModule">
+        <div>
+          <label for="nom">Nom</label>
+          <input id="nom" type="text" v-model="nouveau.nom" required>
+        </div>
+        <div>
+          <label for="note">Note sur 20</label>
+          <input id="note" type="number" min="0" max="20" step="0.1" v-model.number="nouveau.note" required>
+        </div>
+        <div>
+          <label for="coefficient">Coefficient</label>
+          <input id="coefficient" type="number" min="0.1" step="0.1" v-model.number="nouveau.coefficient" required>
+        </div>
+        <button type="submit">Ajouter</button>
+      </form>
+      <p v-if="erreurFormulaire" role="alert">{{ erreurFormulaire }}</p>
+    </section>
+  </main>
+</div>
+
+<script src="notes.js"></script>
+</body>
+</html>
