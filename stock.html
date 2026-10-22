@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Stock - Buvette associative</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+</head>
+<body>
+<div id="app">
+  <h1>Stock de la buvette</h1>
+
+  
+  <div>
+    <span>Valeur totale : <strong>{{ valeurTotaleStock.toFixed(2) }} DH</strong></span>
+    <span>Articles en rupture : <strong>{{ nombreRupture }}</strong></span>
+  </div>
+
+ 
+  <div>
+    <input type="text" v-model="rechercheTexte" placeholder="Rechercher un article...">
+    <select v-model="filtreCategorie">
+      <option value="">Toutes les catégories</option>
+      <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
+    </select>
+  </div>
+
+  <ul>
+    <li v-for="article in articlesFiltres" :key="article.id">
+      <div>
+        <span>{{ article.nom }} </span>
+        <span> {{ article.categorie }} </span>
+
+        
+        <span v-if="article.quantite === 0"> Rupture </span>
+        <span v-else-if="article.quantite <= article.seuilAlerte"> Stock faible </span>
+        <span v-else> Ok </span>
+
+        
+        <button @click="decrementer(article)"> - </button>
+        <span> {{ article.quantite }} </span>
+        <button @click="incrementer(article)"> + </button>
+
+        <button @click="toggleDetail(article)">Détail</button>
+        <button @click="supprimerArticle(article)">Supprimer</button>
+      </div>
+
+      
+      <div v-show="articleOuvert === article.id">
+        <p>Prix unitaire : {{ article.prixUnitaire.toFixed(2) }} DH</p>
+        <p>Seuil d'alerte : {{ article.seuilAlerte }}</p>
+        <p>Valeur en stock : {{ (article.quantite * article.prixUnitaire).toFixed(2) }} DH</p>
+      </div>
+    </li>
+  </ul>
+
+  <p v-if="articlesFiltres.length === 0">Aucun article trouvé.</p>
+
+  
+  <h2>Ajouter un article</h2>
+  <div>
+    <input type="text" v-model="nouveau.nom" placeholder="Nom">
+    <input type="text" v-model="nouveau.categorie" placeholder="Catégorie">
+    <input type="number" min="0" v-model.number="nouveau.quantite" placeholder="Quantité">
+    <input type="number" min="0" step="0.5" v-model.number="nouveau.prixUnitaire" placeholder="Prix unitaire">
+    <input type="number" min="0" v-model.number="nouveau.seuilAlerte" placeholder="Seuil d'alerte">
+    <button @click="ajouterArticle">Ajouter</button>
+  </div>
+</div>
+
+<script src="stock.js"></script>
+</body>
+</html>
